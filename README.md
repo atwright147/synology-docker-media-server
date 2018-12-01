@@ -10,6 +10,7 @@ To correct this do the following:
     ```sh
     sudo chown root:docker /var/run/docker.sock
     ```
+1. Update the `docker-compose.yml` file to reference your `PGID` and `PUID`, [find out how to do that here](https://www.linuxserver.io/docs/puid-pgid/)
 
 Now you can use `docker-compose` to start up your containers.
 

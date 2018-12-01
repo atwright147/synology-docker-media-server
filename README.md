@@ -30,3 +30,7 @@ docker rmi $(docker images -a -q) -f
 # delete all volumes
 docker volume rm $(docker volume ls -q) -f
 ```
+
+## Reference
+
+- docker-compose file based on: https://github.com/sebgl/htpc-download-box/blob/master/docker-compose.yml

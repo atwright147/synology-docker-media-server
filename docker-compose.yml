@@ -26,7 +26,7 @@ services:
       - PGID=100 # default group id, for downloaded files access rights
       - TZ=Europe/London # timezone
     volumes:
-      - /volume1/Downloads/Torrents/ongoing:/downloads # download folder
+      - /volume1/Downloads/Torrents:/downloads # download folder
       - /volume1/docker/media-server/.config/deluge:/config # config files
 
   sonarr:
@@ -42,7 +42,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /volume1/docker/media-server/.config/sonarr:/config # config files
       - /volume1/TV:/tv # tv shows folder
-      - /volume1/Downloads/Torrents/ongoing:/downloads # download folder
+      - /volume1/Downloads/Torrents:/downloads # download folder
 
   radarr:
     container_name: radarr
@@ -57,7 +57,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /volume1/docker/media-server/.config/radarr:/config # config files
       - /volume1/Movies:/movies # movies folder
-      - /volume1/Downloads/Torrents/ongoing:/downloads # download folder
+      - /volume1/Downloads/Torrents:/downloads # download folder
 
   # vpn:
   #   container_name: vpn

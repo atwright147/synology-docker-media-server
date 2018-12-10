@@ -29,8 +29,13 @@ docker rmi $(docker images -a -q) -f
 
 # delete all volumes
 docker volume rm $(docker volume ls -q) -f
+
+# delete all cached images
+docker system prune -a
 ```
 
 ## Reference
 
 - docker-compose file based on: https://github.com/sebgl/htpc-download-box/blob/master/docker-compose.yml
+- Add Jacket as just one indexer in Sonarr and Radarr: https://www.reddit.com/r/PleX/comments/737foz/tip_if_you_use_jackett_for_indexers_you_can_set_a/
+- How-to: Deploy OpenVPN on Synology using Docker: https://www.reddit.com/r/synology/comments/74te0y/howto_deploy_openvpn_on_synology_using_docker/

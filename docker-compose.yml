@@ -69,6 +69,9 @@ services:
     container_name: sonarr
     image: linuxserver/sonarr:latest
     restart: unless-stopped
+    depends_on:
+      - deluge
+      - jackett
     network_mode: host
     environment:
       - PUID=1024 # default user id, for downloaded files access rights
@@ -84,6 +87,9 @@ services:
     container_name: radarr
     image: linuxserver/radarr:latest
     restart: unless-stopped
+    depends_on:
+      - deluge
+      - jackett
     network_mode: host
     environment:
       - PUID=1024 # default user id, for downloaded files access rights

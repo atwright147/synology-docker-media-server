@@ -1,0 +1,21 @@
+version: '3'
+services:
+  portainer:
+    image: portainer/portainer
+    restart: unless-stopped
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    privileged: true
+    ports:
+      - 9000:9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /volume2/docker/portainer/.config/portainer:/config
+    # logging:
+    #   driver: json-file
+    environment:
+      - TZ=Europe/London
+
+volumes:
+  portainer_data:
+      - /volume2/docker/portainer/.config/portainer:/data

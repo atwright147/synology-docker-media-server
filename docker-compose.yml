@@ -1,6 +1,6 @@
 # FROM: https://github.com/sebgl/htpc-download-box/blob/master/docker-compose.yml
 
-version: '3'
+version: "3"
 services:
   vpn:
     image: bubuntux/nordvpn
@@ -13,6 +13,7 @@ services:
       - PASS=REDACTED
       - COUNTRY=REDACTED
       - NETWORK=REDACTED
+      - PROTOCOL=UDP
     networks:
       - default
     ports:

@@ -49,8 +49,8 @@ services:
       - TZ=Europe/London # timezone
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /volume1/Downloads/Torrents/torrent-blackhole:/downloads # place where to put .torrent files
-      - /volume1/docker/media-server/.config/jackett:/config # config files
+      - /volume2/Downloads/Torrents/torrent-blackhole:/downloads # place where to put .torrent files
+      - /volume2/docker/media-server/.config/jackett:/config # config files
 
 
   qbittorrent:

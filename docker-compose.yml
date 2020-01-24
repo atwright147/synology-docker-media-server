@@ -101,23 +101,6 @@ services:
       - /volume1/Movies:/movies # movies folder
       - /volume1/Downloads/Torrents:/downloads # download folder
 
-  lazylibrarian:
-    container_name: lazylibrarian
-    image: linuxserver/lazylibrarian
-    restart: unless-stopped
-    depends_on:
-      - deluge
-      - jackett
-    network_mode: host
-    environment:
-      - PUID=1024 # default user id, for downloaded files access rights
-      - PGID=100 # default group id, for downloaded files access rights
-      - TZ=Europe/London
-    volumes:
-      - /volume1/docker/media-server/.config/lazylibrarian:/config
-      - /volume1/Downloads:/downloads
-      - /volume1/Books:/books
-
   bazarr:
     container_name: bazarr
     image: linuxserver/bazarr

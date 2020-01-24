@@ -52,25 +52,30 @@ services:
       - /volume1/Downloads/Torrents/torrent-blackhole:/downloads # place where to put .torrent files
       - /volume1/docker/media-server/.config/jackett:/config # config files
 
-  deluge:
-    container_name: deluge
-    image: linuxserver/deluge:latest
-    restart: unless-stopped
-    network_mode: host # run on the vpn network
+
+  qbittorrent:
+    image: linuxserver/qbittorrent
+    container_name: qbittorrent
     environment:
-      - PUID=1024 # default user id, for downloaded files access rights
-      - PGID=100 # default group id, for downloaded files access rights
-      - TZ=Europe/London # timezone
+      - PUID=1024
+      - PGID=100
+      - TZ=Europe/London
+      - UMASK_SET=022
+      - WEBUI_PORT=8080
     volumes:
-      - /volume1/Downloads/Torrents:/downloads # download folder
-      - /volume1/docker/media-server/.config/deluge:/config # config files
+      - /volume2/docker/media-server/.config/qbittorrent:/config
+      - /volume2/Downloads/Torrents:/downloads
+    ports:
+      - 6881:6881
+      - 6881:6881/udp
+      - 8080:8080
 
   sonarr:
     container_name: sonarr
     image: linuxserver/sonarr:latest
     restart: unless-stopped
     depends_on:
-      - deluge
+      - qbittorrent
       - jackett
     network_mode: host
     environment:
@@ -88,7 +93,7 @@ services:
     image: linuxserver/radarr:latest
     restart: unless-stopped
     depends_on:
-      - deluge
+      - qbittorrent
       - jackett
     network_mode: host
     environment:

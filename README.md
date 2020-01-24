@@ -18,6 +18,12 @@ Now you can use `docker-compose` to start up your containers.
 docker-compose up -d
 ```
 
+## Setting up your NAS to work with OpenVPN in Docker
+
+Follow the instructions under "Instructions to deploy OpenVPN docker container on Synology" in (this Reddit article)[https://www.reddit.com/r/synology/comments/74te0y/howto_deploy_openvpn_on_synology_using_docker/]. Step 9 is the important one.
+
+Point the scheduled task at `setup-tun.sh` from this repo.
+
 ## Useful docker commands
 
 ```sh

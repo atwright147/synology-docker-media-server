@@ -8,11 +8,11 @@ services:
     cap_add:
       - net_admin
     environment:
-      - TZ=REDACTED
-      - USER=REDACTED
-      - PASS=REDACTED
-      - COUNTRY=REDACTED
-      - NETWORK=REDACTED
+      - TZ=${TZ}
+      - USER=${NORD_USER}
+      - PASS=${NORD_PASS}
+      - COUNTRY=${NORD_COUNTRY}
+      - NETWORK=${NORD_NETWORK}
       - PROTOCOL=UDP
     networks:
       - default
@@ -45,9 +45,9 @@ services:
     network_mode: service:vpn
     # network_mode: host
     environment:
-      - PUID=1024 # default user id, for downloaded files access rights
-      - PGID=100 # default group id, for downloaded files access rights
-      - TZ=Europe/London # timezone
+      - PUID=${PUID} # default user id, for downloaded files access rights
+      - PGID=${PGID} # default group id, for downloaded files access rights
+      - TZ=${TIMEZONE} # timezone
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /volume2/Downloads/Torrents/torrent-blackhole:/downloads # place where to put .torrent files
@@ -58,9 +58,9 @@ services:
     image: linuxserver/qbittorrent
     container_name: qbittorrent
     environment:
-      - PUID=1024
-      - PGID=100
-      - TZ=Europe/London
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
       - UMASK_SET=022
       - WEBUI_PORT=8080
     volumes:
@@ -80,9 +80,9 @@ services:
       - jackett
     network_mode: host
     environment:
-      - PUID=1024 # default user id, for downloaded files access rights
-      - PGID=100 # default group id, for downloaded files access rights
-      - TZ=Europe/London # timezone
+      - PUID=${PUID} # default user id, for downloaded files access rights
+      - PGID=${PGID} # default group id, for downloaded files access rights
+      - TZ=${TIMEZONE} # timezone
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /volume1/docker/media-server/.config/sonarr:/config # config files
@@ -98,9 +98,9 @@ services:
       - jackett
     network_mode: host
     environment:
-      - PUID=1024 # default user id, for downloaded files access rights
-      - PGID=100 # default group id, for downloaded files access rights
-      - TZ=Europe/London # timezone
+      - PUID=${PUID} # default user id, for downloaded files access rights
+      - PGID=${PGID} # default group id, for downloaded files access rights
+      - TZ=${TIMEZONE} # timezone
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /volume1/docker/media-server/.config/radarr:/config # config files
@@ -117,9 +117,9 @@ services:
       - jackett
     network_mode: host
     environment:
-      - PUID=1024 # default user id, for downloaded files access rights
-      - PGID=100 # default group id, for downloaded files access rights
-      - TZ=Europe/London
+      - PUID=${PUID} # default user id, for downloaded files access rights
+      - PGID=${PGID} # default group id, for downloaded files access rights
+      - TZ=${TIMEZONE}
     volumes:
       - /volume1/docker/media-server/.config/bazarr:/config
       - /volume1/Movies:/movies

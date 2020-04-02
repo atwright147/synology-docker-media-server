@@ -50,8 +50,8 @@ services:
       - TZ=${TIMEZONE} # timezone
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /volume2/Downloads/Torrents/torrent-blackhole:/downloads # place where to put .torrent files
-      - /volume2/docker/media-server/.config/jackett:/config # config files
+      - /${BASE_PATH}/Downloads/Torrents/torrent-blackhole:/downloads # place where to put .torrent files
+      - /${BASE_PATH}/docker/media-server/.config/jackett:/config # config files
 
 
   qbittorrent:
@@ -64,8 +64,8 @@ services:
       - UMASK_SET=022
       - WEBUI_PORT=8080
     volumes:
-      - /volume2/docker/media-server/.config/qbittorrent:/config
-      - /volume2/Downloads/Torrents:/downloads
+      - /${BASE_PATH}/docker/media-server/.config/qbittorrent:/config
+      - /${BASE_PATH}/Downloads/Torrents:/downloads
     ports:
       - 6881:6881
       - 6881:6881/udp
@@ -85,9 +85,9 @@ services:
       - TZ=${TIMEZONE} # timezone
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /volume1/docker/media-server/.config/sonarr:/config # config files
-      - /volume1/TV:/tv # tv shows folder
-      - /volume1/Downloads/Torrents:/downloads # download folder
+      - /${BASE_PATH}/docker/media-server/.config/sonarr:/config # config files
+      - /${BASE_PATH}/TV:/tv # tv shows folder
+      - /${BASE_PATH}/Downloads/Torrents:/downloads # download folder
 
   radarr:
     container_name: radarr
@@ -103,9 +103,9 @@ services:
       - TZ=${TIMEZONE} # timezone
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /volume1/docker/media-server/.config/radarr:/config # config files
-      - /volume1/Movies:/movies # movies folder
-      - /volume1/Downloads/Torrents:/downloads # download folder
+      - /${BASE_PATH}/docker/media-server/.config/radarr:/config # config files
+      - /${BASE_PATH}/Movies:/movies # movies folder
+      - /${BASE_PATH}/Downloads/Torrents:/downloads # download folder
 
   bazarr:
     container_name: bazarr
@@ -121,6 +121,6 @@ services:
       - PGID=${PGID} # default group id, for downloaded files access rights
       - TZ=${TIMEZONE}
     volumes:
-      - /volume1/docker/media-server/.config/bazarr:/config
-      - /volume1/Movies:/movies
-      - /volume1/TV:/tv
+      - /${BASE_PATH}/docker/media-server/.config/bazarr:/config
+      - /${BASE_PATH}/Movies:/movies
+      - /${BASE_PATH}/TV:/tv

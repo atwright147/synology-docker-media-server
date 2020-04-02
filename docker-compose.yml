@@ -3,7 +3,7 @@
 version: "3"
 services:
   vpn:
-    image: bubuntux/nordvpn
+    image: "bubuntux/nordvpn:openvpn"
     # cap_add, security_opt, and volume required for the image to function
     cap_add:
       - net_admin

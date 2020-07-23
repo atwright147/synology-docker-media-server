@@ -8,7 +8,7 @@ services:
     cap_add:
       - net_admin
     environment:
-      - TZ=${TZ}
+      - TZ=${TIMEZONE}
       - USER=${NORD_USER}
       - PASS=${NORD_PASS}
       - COUNTRY=${NORD_COUNTRY}

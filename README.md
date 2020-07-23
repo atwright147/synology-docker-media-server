@@ -24,7 +24,9 @@ Follow the instructions under "Instructions to deploy OpenVPN docker container o
 
 Point the scheduled task at `setup-tun.sh` from this repo.
 
-## Useful docker commands
+## Notes
+
+### Useful docker commands
 
 ```sh
 # connect to shell within docker container
@@ -38,6 +40,21 @@ docker volume rm $(docker volume ls -q) -f
 
 # delete all cached images
 docker system prune -a
+```
+
+### Add all public trackers to Jackett
+
+1. Open the "Add Indexer" modal
+1. Open your browser's dev tools
+1. Run the following JavaScript in the dev tools' console:
+
+```js
+document.querySelectorAll('#unconfigured-indexer-datatable tbody tr').forEach((row, index) => {
+    if (row.cells[2].textContent === 'public') {
+        const button = row.cells[4].querySelector('button[title="Add"]');
+        button.click();
+    }
+});
 ```
 
 ## Reference

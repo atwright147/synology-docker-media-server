@@ -124,3 +124,28 @@ services:
       - /${BASE_PATH}/docker/media-server/.config/bazarr:/config
       - /${BASE_PATH}/Movies:/movies
       - /${BASE_PATH}/TV:/tv
+
+  jellyfin:
+    container_name: jellyfin
+    image: linuxserver/jellyfin
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - /${BASE_PATH}/docker/media-server/.config/jellyfin:/config
+      - /${BASE_PATH}/TV:/data/tvshows
+      - /${BASE_PATH}/Movies:/data/movies
+      #- /opt/vc/lib:/opt/vc/lib #optional
+    ports:
+      - 8096:8096
+    #   - 8920:8920 #optional
+    devices:
+      - /dev/dri:/dev/dri #optional
+    #   - /dev/vcsm:/dev/vcsm #optional
+    #   - /dev/vchiq:/dev/vchiq #optional
+    #   - /dev/video10:/dev/video10 #optional
+    #   - /dev/video11:/dev/video11 #optional
+    #   - /dev/video12:/dev/video12 #optional

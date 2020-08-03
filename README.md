@@ -57,6 +57,29 @@ document.querySelectorAll('#unconfigured-indexer-datatable tbody tr').forEach((r
 });
 ```
 
+### Notify JellyFin of new downloads from Sonarr and Radarr
+
+#### JellyFin API key
+
+1. Open the JellyFin Dashboard
+1. Go to API Keys
+1. Click on the plus symbol next to the page title
+1. Name your new key something like: "Sonarr and Radarr"
+
+#### Set up Sonarr and Radarr
+
+1. In Sonarr and Radarr, go to Settings > Connect and add an new Custom Script.
+1. Name your script something like "Refresh JellyFin"
+1. Choose what should trigger notifying JellyFin, I chose:
+    ```
+    On Grab - No
+    On Download - Yes
+    On Upgrade - Yes
+    On Rename - No
+    ```
+1. In the Path field enter `/usr/bin/curl`
+1. In the Arguments field enter: `-v -d "" -H "X-MediaBrowser-Token: JELLYFIN_TOKEN" http://JELLYFIN_IP_ADDRESS:JELLYFIN_PORT/library/refresh`
+
 ## Reference
 
 - docker-compose file based on: https://github.com/sebgl/htpc-download-box/blob/master/docker-compose.yml

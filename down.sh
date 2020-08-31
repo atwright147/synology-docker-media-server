@@ -10,4 +10,4 @@ docker rmi $(docker images -a -q) -f;
 docker volume rm $(docker volume ls -q) -f;
 
 echo "Remove OpenVPN server lists";
-rm -rf /volume2/docker/media-server/.config/vpn/ovpn
+rm -rf /volume2/docker/media-server/.config/vpn/*

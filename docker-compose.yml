@@ -73,7 +73,8 @@ services:
 
   sonarr:
     container_name: sonarr
-    image: linuxserver/sonarr:latest
+    # image: linuxserver/sonarr:latest
+    image: linuxserver/sonarr:preview
     restart: unless-stopped
     depends_on:
       - qbittorrent
@@ -86,6 +87,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /${BASE_PATH}/docker/media-server/.config/sonarr:/config # config files
+      - /${BASE_PATH}/docker/media-server/scripts:/scripts
       - /${BASE_PATH}/TV:/tv # tv shows folder
       - /${BASE_PATH}/Downloads/Torrents:/downloads # download folder
 
@@ -104,6 +106,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /${BASE_PATH}/docker/media-server/.config/radarr:/config # config files
+      - /${BASE_PATH}/docker/media-server/scripts:/scripts
       - /${BASE_PATH}/Movies:/movies # movies folder
       - /${BASE_PATH}/Downloads/Torrents:/downloads # download folder
 

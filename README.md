@@ -26,6 +26,16 @@ Point the scheduled task at `setup-tun.sh` from this repo.
 
 ## Notes
 
+### Refreah docker images
+
+```sh
+docker-compose down
+
+docker-compose pull
+
+docker-compose up -d --build
+```
+
 ### Useful docker commands
 
 ```sh
@@ -66,6 +76,11 @@ document.querySelectorAll('#unconfigured-indexer-datatable tbody tr').forEach((r
 1. Click on the plus symbol next to the page title
 1. Name your new key something like: "Sonarr and Radarr"
 
+#### Update `jellyfin-connect.sh` script
+
+1. Paste the JellyFin API key into `scripts/jellyfin-connect.sh` to replace `JELLYFIN_TOKEN`
+1. Replace `JELLYFIN_ADDRESS` with the IP address or domain name of your JellyFin server
+
 #### Set up Sonarr and Radarr
 
 1. In Sonarr and Radarr, go to Settings > Connect and add an new Custom Script.
@@ -77,11 +92,11 @@ document.querySelectorAll('#unconfigured-indexer-datatable tbody tr').forEach((r
     On Upgrade - Yes
     On Rename - No
     ```
-1. In the Path field enter `/usr/bin/curl`
-1. In the Arguments field enter: `-v -d "" -H "X-MediaBrowser-Token: JELLYFIN_TOKEN" http://JELLYFIN_IP_ADDRESS:JELLYFIN_PORT/library/refresh`
+1. In the Path field enter `/scripts/jellyfin-connect.sh`
 
 ## Reference
 
 - docker-compose file based on: https://github.com/sebgl/htpc-download-box/blob/master/docker-compose.yml
 - Add Jacket as just one indexer in Sonarr and Radarr: https://www.reddit.com/r/PleX/comments/737foz/tip_if_you_use_jackett_for_indexers_you_can_set_a/
 - How-to: Deploy OpenVPN on Synology using Docker: https://www.reddit.com/r/synology/comments/74te0y/howto_deploy_openvpn_on_synology_using_docker/
+- JellyFin connect script for Sonarr and Radarr v3: https://www.reddit.com/r/jellyfin/comments/g1p8p4/radarrsonnarr_connect_date_added_behavior_for_new/fnjue49/?utm_source=reddit&utm_medium=web2x&context=3

@@ -3,38 +3,21 @@
 version: "3"
 services:
   vpn:
-    image: "bubuntux/nordvpn:openvpn"
-    # cap_add, security_opt, and volume required for the image to function
+    image: qmcgaw/gluetun
     cap_add:
-      - net_admin
+      - NET_ADMIN
     environment:
-      - TZ=${TIMEZONE}
-      - USER=${NORD_USER}
-      - PASS=${NORD_PASS}
-      - COUNTRY=${NORD_COUNTRY}
-      - NETWORK=${NORD_NETWORK}
-      - PROTOCOL=UDP
-    networks:
-      - default
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - OPENVPN_USER=${NORD_SERVICE_USER}
+      - OPENVPN_PASSWORD=${NORD_SERVICE_PASS}
+      - SERVER_COUNTRIES=Netherlands
     ports:
-      - 9117:9117
-    tmpfs:
-      - /run
-      - /tmp
-    restart: unless-stopped
-    security_opt:
-      - label:disable
-    stdin_open: true
-    tty: true
-    dns:
-      - "8.8.8.8"
-      - "8.8.4.4"
-    volumes:
-      - /dev/net:/dev/net:z
-    # Put .ovpn configuration file in the /vpn directory (in "volumes:" above or
-    # launch using the command line arguments, IE pick one:
-      - ./.config/vpn:/vpn
-    # command: 'server;user;password[;port]'
+      - 9117:9117  # Jackett
+      - 9696:9696  # Prowlarr
+      # qBitTorrent
+      - 6881:6881
+      - 6881:6881/udp
+      - 8080:8080
 
   jackett:
     container_name: jackett
@@ -43,20 +26,35 @@ services:
     depends_on:
       - vpn
     network_mode: service:vpn
-    # network_mode: host
     environment:
-      - PUID=${PUID} # default user id, for downloaded files access rights
-      - PGID=${PGID} # default group id, for downloaded files access rights
-      - TZ=${TIMEZONE} # timezone
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /${BASE_PATH}/Downloads/Torrents/torrent-blackhole:/downloads # place where to put .torrent files
-      - /${BASE_PATH}/docker/media-server/.config/jackett:/config # config files
+      - /${BASE_PATH}/docker/media-server/.config/jackett:/config
 
+  prowlarr:
+    image: linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+    depends_on:
+      - vpn
+    network_mode: service:vpn
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - /${BASE_PATH}/docker/media-server/.config/prowlarr:/config
 
   qbittorrent:
     image: linuxserver/qbittorrent
     container_name: qbittorrent
+    depends_on:
+      - vpn
+    network_mode: service:vpn
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -66,30 +64,25 @@ services:
     volumes:
       - /${BASE_PATH}/docker/media-server/.config/qbittorrent:/config
       - /${BASE_PATH}/Downloads/Torrents:/downloads
-    ports:
-      - 6881:6881
-      - 6881:6881/udp
-      - 8080:8080
 
   sonarr:
     container_name: sonarr
-    # image: linuxserver/sonarr:latest
-    image: linuxserver/sonarr:preview
+    image: linuxserver/sonarr:latest
     restart: unless-stopped
     depends_on:
       - qbittorrent
       - jackett
     network_mode: host
     environment:
-      - PUID=${PUID} # default user id, for downloaded files access rights
-      - PGID=${PGID} # default group id, for downloaded files access rights
-      - TZ=${TIMEZONE} # timezone
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /${BASE_PATH}/docker/media-server/.config/sonarr:/config # config files
+      - /${BASE_PATH}/docker/media-server/.config/sonarr:/config
       - /${BASE_PATH}/docker/media-server/scripts:/scripts
-      - /${BASE_PATH}/TV:/tv # tv shows folder
-      - /${BASE_PATH}/Downloads/Torrents:/downloads # download folder
+      - /${BASE_PATH}/TV:/tv
+      - /${BASE_PATH}/Downloads/Torrents:/downloads
 
   radarr:
     container_name: radarr
@@ -100,15 +93,61 @@ services:
       - jackett
     network_mode: host
     environment:
-      - PUID=${PUID} # default user id, for downloaded files access rights
-      - PGID=${PGID} # default group id, for downloaded files access rights
-      - TZ=${TIMEZONE} # timezone
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /${BASE_PATH}/docker/media-server/.config/radarr:/config # config files
+      - /${BASE_PATH}/docker/media-server/.config/radarr:/config
       - /${BASE_PATH}/docker/media-server/scripts:/scripts
-      - /${BASE_PATH}/Movies:/movies # movies folder
-      - /${BASE_PATH}/Downloads/Torrents:/downloads # download folder
+      - /${BASE_PATH}/Movies:/movies
+      - /${BASE_PATH}/Downloads/Torrents:/downloads
+
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:latest
+    container_name: overseerr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - /${BASE_PATH}/docker/media-server/.config/overseerr:/config
+    ports:
+      - 5055:5055
+    restart: unless-stopped
+
+  readarr:
+    container_name: readarr
+    image: linuxserver/readarr:develop
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - /${BASE_PATH}/docker/media-server/.config/readarr:/config
+      - /${BASE_PATH}/Books:/books
+      - /${BASE_PATH}/Downloads/Books:/downloads
+    ports:
+      - 8787:8787
+    restart: unless-stopped
+      
+  lidarr:
+    container_name: lidarr
+    image: linuxserver/lidarr:latest
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+      - jackett
+    network_mode: host
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /${BASE_PATH}/docker/media-server/.config/lidarr:/config
+      - /${BASE_PATH}/Downloads/Music:/music
+      - /${BASE_PATH}/Downloads/Torrents:/downloads
 
   bazarr:
     container_name: bazarr
@@ -120,35 +159,40 @@ services:
       - jackett
     network_mode: host
     environment:
-      - PUID=${PUID} # default user id, for downloaded files access rights
-      - PGID=${PGID} # default group id, for downloaded files access rights
+      - PUID=${PUID}
+      - PGID=${PGID}
       - TZ=${TIMEZONE}
     volumes:
       - /${BASE_PATH}/docker/media-server/.config/bazarr:/config
       - /${BASE_PATH}/Movies:/movies
       - /${BASE_PATH}/TV:/tv
-
-  jellyfin:
-    container_name: jellyfin
-    image: linuxserver/jellyfin
+      
+  emby:
+    image: linuxserver/emby:latest
+    container_name: emby
     restart: unless-stopped
-    network_mode: host
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TIMEZONE}
     volumes:
-      - /${BASE_PATH}/docker/media-server/.config/jellyfin:/config
       - /${BASE_PATH}/TV:/data/tvshows
       - /${BASE_PATH}/Movies:/data/movies
-      #- /opt/vc/lib:/opt/vc/lib #optional
+      - /${BASE_PATH}/docker/media-server/.config/emby:/config
     ports:
-      - 8096:8096
-    #   - 8920:8920 #optional
+      - 8097:8096/tcp
+      - 8096:8096/tcp
     devices:
-      - /dev/dri:/dev/dri #optional
-    #   - /dev/vcsm:/dev/vcsm #optional
-    #   - /dev/vchiq:/dev/vchiq #optional
-    #   - /dev/video10:/dev/video10 #optional
-    #   - /dev/video11:/dev/video11 #optional
-    #   - /dev/video12:/dev/video12 #optional
+      - /dev/dri:/dev/dri
+  
+  homer:
+    image: b4bz/homer
+    container_name: homer
+    volumes:
+      - /${BASE_PATH}/docker/media-server/.config/homer/assets:/www/assets
+    ports:
+      - 8000:8080
+    environment:
+      - UID=${PUID}
+      - GID=${PGID}
+    restart: unless-stopped

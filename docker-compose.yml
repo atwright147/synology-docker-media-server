@@ -6,6 +6,7 @@ services:
     image: qmcgaw/gluetun
     cap_add:
       - NET_ADMIN
+    hostname: gluetun
     environment:
       - VPN_SERVICE_PROVIDER=nordvpn
       - OPENVPN_USER=${NORD_SERVICE_USER}
@@ -14,6 +15,10 @@ services:
     ports:
       - 9117:9117  # Jackett
       - 9696:9696  # Prowlarr
+      - 7878:7878  # Redarr
+      - 8686:8686  # Lidarr
+      - 8787:8787  # Readerr
+      - 8989:8989  # Sonarr
       # qBitTorrent
       - 6881:6881
       - 6881:6881/udp
@@ -65,14 +70,28 @@ services:
       - /${BASE_PATH}/docker/media-server/.config/qbittorrent:/config
       - /${BASE_PATH}/Downloads/Torrents:/downloads
 
+  # jellyseerr:
+  #   image: fallenbagel/jellyseerr:latest
+  #   container_name: jellyseerr
+  #   environment:
+  #     - TZ=${TIMEZONE}
+  #     - JELLYFIN_TYPE=emby
+  #   ports:
+  #     - 5055:5055
+  #   volumes:
+  #     - /${BASE_PATH}/docker/media-server/.config/jellyseerr:/app/config
+  #   restart: unless-stopped
+
   sonarr:
     container_name: sonarr
     image: linuxserver/sonarr:latest
     restart: unless-stopped
+    network_mode: service:vpn
     depends_on:
+      - vpn
       - qbittorrent
-      - jackett
-    network_mode: host
+      # - jackett
+    # network_mode: host
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -88,10 +107,12 @@ services:
     container_name: radarr
     image: linuxserver/radarr:latest
     restart: unless-stopped
+    network_mode: service:vpn
     depends_on:
+      - vpn
       - qbittorrent
-      - jackett
-    network_mode: host
+      # - jackett
+    # network_mode: host
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -103,22 +124,15 @@ services:
       - /${BASE_PATH}/Movies:/movies
       - /${BASE_PATH}/Downloads/Torrents:/downloads
 
-  overseerr:
-    image: lscr.io/linuxserver/overseerr:latest
-    container_name: overseerr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TIMEZONE}
-    volumes:
-      - /${BASE_PATH}/docker/media-server/.config/overseerr:/config
-    ports:
-      - 5055:5055
-    restart: unless-stopped
-
   readarr:
     container_name: readarr
     image: linuxserver/readarr:develop
+    restart: unless-stopped
+    network_mode: service:vpn
+    depends_on:
+      - vpn
+      - qbittorrent
+      # - jackett
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -127,18 +141,16 @@ services:
       - /${BASE_PATH}/docker/media-server/.config/readarr:/config
       - /${BASE_PATH}/Books:/books
       - /${BASE_PATH}/Downloads/Books:/downloads
-    ports:
-      - 8787:8787
-    restart: unless-stopped
       
   lidarr:
     container_name: lidarr
     image: linuxserver/lidarr:latest
     restart: unless-stopped
+    network_mode: service:vpn
     depends_on:
+      - vpn
       - qbittorrent
-      - jackett
-    network_mode: host
+      # - jackett
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -185,14 +197,12 @@ services:
     devices:
       - /dev/dri:/dev/dri
   
-  homer:
-    image: b4bz/homer
-    container_name: homer
-    volumes:
-      - /${BASE_PATH}/docker/media-server/.config/homer/assets:/www/assets
-    ports:
-      - 8000:8080
-    environment:
-      - UID=${PUID}
-      - GID=${PGID}
-    restart: unless-stopped
+  # homarr:
+  #   container_name: homarr
+  #   image: ghcr.io/ajnart/homarr:latest
+  #   restart: unless-stopped
+  #   volumes:
+  #     - /${BASE_PATH}/docker/media-server/.config/homarr:/app/data/configs
+  #     - /${BASE_PATH}/docker/media-server/.config/homarr/icons:/app/public/icons
+  #   ports:
+  #     - 7575:7575

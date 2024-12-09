@@ -19,6 +19,7 @@ services:
       - 8686:8686  # Lidarr
       - 8787:8787  # Readerr
       - 8989:8989  # Sonarr
+      - 8191:8191  # FlareSolverr
       # qBitTorrent
       - 6881:6881
       - 6881:6881/udp
@@ -53,6 +54,22 @@ services:
       - TZ=${TIMEZONE}
     volumes:
       - /${BASE_PATH}/docker/media-server/.config/prowlarr:/config
+
+  flaresolverr:
+    image: flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+    network_mode: service:vpn
+    depends_on:
+      - vpn
+      # vpn:
+      #   condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    restart: always
 
   qbittorrent:
     image: linuxserver/qbittorrent

@@ -211,8 +211,8 @@ services:
     ports:
       - 8097:8096/tcp
       - 8096:8096/tcp
-    devices:
-      - /dev/dri:/dev/dri
+    # devices:
+    #   - /dev/dri:/dev/dri
   
   # homarr:
   #   container_name: homarr

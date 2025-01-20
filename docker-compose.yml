@@ -12,14 +12,15 @@ services:
       - OPENVPN_USER=${NORD_SERVICE_USER}
       - OPENVPN_PASSWORD=${NORD_SERVICE_PASS}
       - SERVER_COUNTRIES=Netherlands
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.0.0/24
     ports:
-      - 9117:9117  # Jackett
-      - 9696:9696  # Prowlarr
-      - 7878:7878  # Redarr
-      - 8686:8686  # Lidarr
-      - 8787:8787  # Readerr
-      - 8989:8989  # Sonarr
-      - 8191:8191  # FlareSolverr
+      # - 9117:9117  # Jackett
+      # - 9696:9696  # Prowlarr
+      # - 7878:7878  # Radarr
+      # - 8686:8686  # Lidarr
+      # - 8787:8787  # Readerr
+      # - 8989:8989  # Sonarr
+      # - 8191:8191  # FlareSolverr
       # qBitTorrent
       - 6881:6881
       - 6881:6881/udp
@@ -29,9 +30,8 @@ services:
     container_name: jackett
     image: linuxserver/jackett:latest
     restart: unless-stopped
-    depends_on:
-      - vpn
-    network_mode: service:vpn
+    ports:
+      - 9117:9117
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -45,9 +45,8 @@ services:
     image: linuxserver/prowlarr:latest
     container_name: prowlarr
     restart: unless-stopped
-    depends_on:
-      - vpn
-    network_mode: service:vpn
+    ports:
+      - 9696:9696
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -62,11 +61,8 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TIMEZONE}
-    network_mode: service:vpn
-    depends_on:
-      - vpn
-      # vpn:
-      #   condition: service_healthy
+    ports:
+      - 8191:8191
     security_opt:
       - no-new-privileges:true
     restart: always
@@ -75,7 +71,8 @@ services:
     image: linuxserver/qbittorrent
     container_name: qbittorrent
     depends_on:
-      - vpn
+      vpn:
+        condition: service_healthy
     network_mode: service:vpn
     environment:
       - PUID=${PUID}
@@ -87,28 +84,12 @@ services:
       - /${BASE_PATH}/docker/media-server/.config/qbittorrent:/config
       - /${BASE_PATH}/Downloads/Torrents:/downloads
 
-  # jellyseerr:
-  #   image: fallenbagel/jellyseerr:latest
-  #   container_name: jellyseerr
-  #   environment:
-  #     - TZ=${TIMEZONE}
-  #     - JELLYFIN_TYPE=emby
-  #   ports:
-  #     - 5055:5055
-  #   volumes:
-  #     - /${BASE_PATH}/docker/media-server/.config/jellyseerr:/app/config
-  #   restart: unless-stopped
-
   sonarr:
     container_name: sonarr
     image: linuxserver/sonarr:latest
     restart: unless-stopped
-    network_mode: service:vpn
-    depends_on:
-      - vpn
-      - qbittorrent
-      # - jackett
-    # network_mode: host
+    ports:
+      - 8989:8989
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -124,12 +105,8 @@ services:
     container_name: radarr
     image: linuxserver/radarr:latest
     restart: unless-stopped
-    network_mode: service:vpn
-    depends_on:
-      - vpn
-      - qbittorrent
-      # - jackett
-    # network_mode: host
+    ports:
+      - 7878:7878
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -145,11 +122,8 @@ services:
     container_name: readarr
     image: linuxserver/readarr:develop
     restart: unless-stopped
-    network_mode: service:vpn
-    depends_on:
-      - vpn
-      - qbittorrent
-      # - jackett
+    ports:
+      - 8787:8787
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -163,11 +137,8 @@ services:
     container_name: lidarr
     image: linuxserver/lidarr:latest
     restart: unless-stopped
-    network_mode: service:vpn
-    depends_on:
-      - vpn
-      - qbittorrent
-      # - jackett
+    ports:
+      - 8686:8686
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -182,11 +153,8 @@ services:
     container_name: bazarr
     image: linuxserver/bazarr
     restart: unless-stopped
-    depends_on:
-      - sonarr
-      - radarr
-      - jackett
-    network_mode: host
+    ports:
+      - 6767:6767
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -211,15 +179,3 @@ services:
     ports:
       - 8097:8096/tcp
       - 8096:8096/tcp
-    # devices:
-    #   - /dev/dri:/dev/dri
-  
-  # homarr:
-  #   container_name: homarr
-  #   image: ghcr.io/ajnart/homarr:latest
-  #   restart: unless-stopped
-  #   volumes:
-  #     - /${BASE_PATH}/docker/media-server/.config/homarr:/app/data/configs
-  #     - /${BASE_PATH}/docker/media-server/.config/homarr/icons:/app/public/icons
-  #   ports:
-  #     - 7575:7575

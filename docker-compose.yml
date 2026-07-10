@@ -84,6 +84,24 @@ services:
       - /${BASE_PATH}/docker/media-server/.config/qbittorrent:/config
       - /${BASE_PATH}/Downloads/Torrents:/downloads
 
+  # caddy:
+  #   build:
+  #     context: ./caddy
+  #     dockerfile: Dockerfile
+  #   container_name: caddy
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8081:8081"
+  #     - "8443:8443"
+  #   environment:
+  #     - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+  #   volumes:
+  #     - /${BASE_PATH}/docker/media-server/.config/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+  #     - /${BASE_PATH}/docker/media-server/.config/caddy/data:/data
+  #     - /${BASE_PATH}/docker/media-server/.config/caddy/config:/config
+  #   networks:
+  #     - proxy-network
+
   sonarr:
     container_name: sonarr
     image: linuxserver/sonarr:latest
@@ -100,6 +118,8 @@ services:
       - /${BASE_PATH}/docker/media-server/scripts:/scripts
       - /${BASE_PATH}/TV:/tv
       - /${BASE_PATH}/Downloads/Torrents:/downloads
+    networks:
+      - proxy-network
 
   radarr:
     container_name: radarr
@@ -117,37 +137,39 @@ services:
       - /${BASE_PATH}/docker/media-server/scripts:/scripts
       - /${BASE_PATH}/Movies:/movies
       - /${BASE_PATH}/Downloads/Torrents:/downloads
+    networks:
+      - proxy-network
 
-  readarr:
-    container_name: readarr
-    image: linuxserver/readarr:develop
-    restart: unless-stopped
-    ports:
-      - 8787:8787
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TIMEZONE}
-    volumes:
-      - /${BASE_PATH}/docker/media-server/.config/readarr:/config
-      - /${BASE_PATH}/Books:/books
-      - /${BASE_PATH}/Downloads/Books:/downloads
+  # readarr:
+  #   container_name: readarr
+  #   image: linuxserver/readarr:develop
+  #   restart: unless-stopped
+  #   ports:
+  #     - 8787:8787
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TIMEZONE}
+  #   volumes:
+  #     - /${BASE_PATH}/docker/media-server/.config/readarr:/config
+  #     - /${BASE_PATH}/Books:/books
+  #     - /${BASE_PATH}/Downloads/Books:/downloads
       
-  lidarr:
-    container_name: lidarr
-    image: linuxserver/lidarr:latest
-    restart: unless-stopped
-    ports:
-      - 8686:8686
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TIMEZONE}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /${BASE_PATH}/docker/media-server/.config/lidarr:/config
-      - /${BASE_PATH}/Downloads/Music:/music
-      - /${BASE_PATH}/Downloads/Torrents:/downloads
+  # lidarr:
+  #   container_name: lidarr
+  #   image: linuxserver/lidarr:latest
+  #   restart: unless-stopped
+  #   ports:
+  #     - 8686:8686
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TIMEZONE}
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - /${BASE_PATH}/docker/media-server/.config/lidarr:/config
+  #     - /${BASE_PATH}/Downloads/Music:/music
+  #     - /${BASE_PATH}/Downloads/Torrents:/downloads
 
   bazarr:
     container_name: bazarr
@@ -179,3 +201,38 @@ services:
     ports:
       - 8097:8096/tcp
       - 8096:8096/tcp
+
+  cleanuparr:
+    image: ghcr.io/cleanuparr/cleanuparr:latest
+    container_name: cleanuparr
+    restart: unless-stopped
+    ports:
+      - "11011:11011"
+    volumes:
+      - /${BASE_PATH}/docker/media-server/.config/cleanuparr:/config
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+    # Health check configuration
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11011/health"]
+      interval: 30s        # Check every 30 seconds
+      timeout: 10s         # Allow up to 10 seconds for response
+      start_period: 30s    # Wait 30 seconds before first check
+      retries: 3           # Mark unhealthy after 3 consecutive failures
+      
+  # sonarr_youtubedl:
+  #   image: dungfu/sonarr_youtubedl
+  #   container_name: sonarr_youtubedl
+  #   volumes:
+  #     - /${BASE_PATH}/docker/media-server/.config/sonarr_youtubedl:/config
+  #     - /${BASE_PATH}/TV:/sonarr_root
+  #     - /${BASE_PATH}/docker/media-server/.logs/sonarr_youtubedl:/logs
+  #     - /${BASE_PATH}/docker/media-server/.config/sonarr_youtubedl/yt-dlp.conf:/etc/yt-dlp.conf:ro
+  #   networks:
+  #     - proxy-network
+
+networks:
+  proxy-network:
+    driver: bridge

@@ -9,11 +9,23 @@ services:
       - NET_ADMIN
     hostname: gluetun
     environment:
-      - VPN_SERVICE_PROVIDER=nordvpn
-      - OPENVPN_USER=${NORD_SERVICE_USER}
-      - OPENVPN_PASSWORD=${NORD_SERVICE_PASS}
-      - SERVER_COUNTRIES=Netherlands
-      - FIREWALL_OUTBOUND_SUBNETS=192.168.0.0/24
+      # - VPN_SERVICE_PROVIDER=nordvpn
+      # - OPENVPN_USER=${NORD_SERVICE_USER}
+      # - OPENVPN_PASSWORD=${NORD_SERVICE_PASS}
+      # - SERVER_COUNTRIES=Netherlands
+      # - FIREWALL_OUTBOUND_SUBNETS=192.168.0.0/24
+      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
+      - VPN_TYPE=${VPN_TYPE}
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - SERVER_COUNTRIES=${SERVER_COUNTRIES}
+      - VPN_PORT_FORWARDING=${VPN_PORT_FORWARDING}
+      - VPN_PORT_FORWARDING_PROVIDER=${VPN_PORT_FORWARDING_PROVIDER}
+      - PORT_FORWARD_ONLY=${PORT_FORWARD_ONLY}
+      - VPN_PORT_FORWARDING_SCRIPT=/scripts/update-port-forward.sh
+      - QB_USERNAME=${QB_USERNAME:-admin}
+      - QB_PASSWORD=${QB_PASSWORD:-adminadmin}
+    volumes:
+      - /${BASE_PATH}/docker/media-server/scripts:/scripts
     ports:
       # - 9117:9117  # Jackett
       # - 9696:9696  # Prowlarr
@@ -66,7 +78,7 @@ services:
       - 8191:8191
     security_opt:
       - no-new-privileges:true
-    restart: always
+    restart: unless-stopped
 
   qbittorrent:
     image: linuxserver/qbittorrent

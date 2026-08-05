@@ -21,8 +21,11 @@ services:
       - VPN_PORT_FORWARDING=${VPN_PORT_FORWARDING}
       - VPN_PORT_FORWARDING_PROVIDER=${VPN_PORT_FORWARDING_PROVIDER}
       - PORT_FORWARD_ONLY=${PORT_FORWARD_ONLY}
-      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":{{PORT}},\"random_port\":false,\"upnp\":false}" http://localhost:8080/api/v2/app/setPreferences'
-      - VPN_PORT_FORWARDING_DOWN_COMMAND=/bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":0}" http://localhost:8080/api/v2/app/setPreferences'
+      - VPN_PORT_FORWARDING_SCRIPT=/scripts/update-port-forward.sh
+      - QB_USERNAME=${QB_USERNAME:-admin}
+      - QB_PASSWORD=${QB_PASSWORD:-adminadmin}
+    volumes:
+      - /${BASE_PATH}/docker/media-server/scripts:/scripts
     ports:
       # - 9117:9117  # Jackett
       # - 9696:9696  # Prowlarr

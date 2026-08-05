@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PORT=$1
+PORT=${1:-0}
 QB_USERNAME=${QB_USERNAME:-admin}
 QB_PASSWORD=${QB_PASSWORD:-adminadmin}
 QB_HOST=${QB_HOST:-http://localhost:8080}

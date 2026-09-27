@@ -39,6 +39,28 @@ services:
       - 6881:6881/udp
       - 8080:8080
 
+  port-refresh:
+    container_name: port-refresh
+    image: alpine:latest
+    restart: unless-stopped
+    depends_on:
+      vpn:
+        condition: service_healthy
+    network_mode: service:vpn
+    environment:
+      - QB_USERNAME=${QB_USERNAME:-admin}
+      - QB_PASSWORD=${QB_PASSWORD:-adminadmin}
+    volumes:
+      - /${BASE_PATH}/docker/media-server/scripts:/scripts:ro
+    command: >
+      /bin/sh -c '
+      apk add --no-cache curl wget >/dev/null 2>&1;
+      while true; do
+        /scripts/update-port-forward.sh;
+        sleep 600;
+      done
+      '
+
   jackett:
     container_name: jackett
     image: linuxserver/jackett:latest

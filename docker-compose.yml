@@ -21,11 +21,10 @@ services:
       - VPN_PORT_FORWARDING=${VPN_PORT_FORWARDING}
       - VPN_PORT_FORWARDING_PROVIDER=${VPN_PORT_FORWARDING_PROVIDER}
       - PORT_FORWARD_ONLY=${PORT_FORWARD_ONLY}
-      - VPN_PORT_FORWARDING_SCRIPT=/scripts/update-port-forward.sh
-      - QB_USERNAME=${QB_USERNAME:-admin}
-      - QB_PASSWORD=${QB_PASSWORD:-adminadmin}
+      # Allow qSticky to reach both APIs over the Docker network.
+      - FIREWALL_INPUT_PORTS=8000,8080
     volumes:
-      - /${BASE_PATH}/docker/media-server/scripts:/scripts
+      - ./gluetun/auth/config.toml:/gluetun/auth/config.toml:ro
     ports:
       # - 9117:9117  # Jackett
       # - 9696:9696  # Prowlarr
@@ -39,27 +38,33 @@ services:
       - 6881:6881/udp
       - 8080:8080
 
-  port-refresh:
-    container_name: port-refresh
-    image: alpine:latest
+  qsticky:
+    image: ghcr.io/monstermuffin/qsticky:2.4.3
     restart: unless-stopped
     depends_on:
       vpn:
         condition: service_healthy
-    network_mode: service:vpn
+      qbittorrent:
+        condition: service_started
+    # Its own network namespace lets qSticky reconnect when VPN is recreated.
     environment:
-      - QB_USERNAME=${QB_USERNAME:-admin}
-      - QB_PASSWORD=${QB_PASSWORD:-adminadmin}
-    volumes:
-      - /${BASE_PATH}/docker/media-server/scripts:/scripts:ro
-    command: >
-      /bin/sh -c '
-      apk add --no-cache curl wget >/dev/null 2>&1;
-      while true; do
-        /scripts/update-port-forward.sh;
-        sleep 600;
-      done
-      '
+      - QBITTORRENT_HOST=vpn
+      - QBITTORRENT_PORT=8080
+      - QBITTORRENT_HTTPS=false
+      - QBITTORRENT_USER=${QB_USERNAME:-admin}
+      - QBITTORRENT_PASS=${QB_PASSWORD:?Set QB_PASSWORD to your qBittorrent Web UI password}
+      - GLUETUN_HOST=vpn
+      - GLUETUN_PORT=8000
+      - GLUETUN_AUTH_TYPE=apikey
+      - CHECK_INTERVAL=15
+      - LOG_LEVEL=INFO
+    secrets:
+      - gluetun_apikey
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
 
   jackett:
     container_name: jackett
@@ -272,3 +277,7 @@ services:
 networks:
   proxy-network:
     driver: bridge
+
+secrets:
+  gluetun_apikey:
+    file: ./gluetun/auth/gluetun_apikey

@@ -24,6 +24,70 @@ Follow the instructions under "Instructions to deploy OpenVPN docker container o
 
 Point the scheduled task at `setup-tun.sh` from this repo.
 
+## qSticky port synchronization
+
+[qSticky](https://github.com/monstermuffin/qSticky) replaces the old `port-refresh`
+container and `scripts/update-port-forward.sh`. It checks Gluetun and qBittorrent
+every 15 seconds, updates mismatched listening ports, and verifies the result.
+The image is pinned to `2.4.3`; Gluetun remains pinned to `v3.41.3`.
+
+qSticky uses the normal Docker network to reach both APIs at `vpn`, so it can
+reconnect after the VPN container is recreated. qBittorrent still shares the VPN
+network namespace. Gluetun allows API ports `8000` and `8080` through its default
+interface; only the existing qBittorrent Web UI port is published on the NAS.
+
+### Configure and deploy on the NAS
+
+Copy the updated compose file and `scripts/setup-qsticky-auth.sh` to the NAS
+stack directory. Keep your existing `.env`, including the new ProtonVPN
+WireGuard key. Set `QB_USERNAME` and `QB_PASSWORD` in that file to the actual
+qBittorrent Web UI credentials. Use a permanent Web UI password; `adminadmin`
+is not the default on modern qBittorrent images. Single-quote `.env` values
+containing characters such as `$` or `#`.
+
+From that stack directory, generate the API credentials:
+
+```sh
+sh scripts/setup-qsticky-auth.sh
+```
+
+The helper creates two ignored local files under `gluetun/auth`: `config.toml`
+grants access only to `GET /v1/portforward` and `GET /v1/vpn/status`, and
+`gluetun_apikey` supplies the matching key to qSticky as a Compose secret. No
+manual TOML editing is needed. Running the helper again preserves existing
+credentials. Back up both files together with your private `.env`.
+
+Validate the configuration and fetch qSticky before stopping the old updater:
+
+```sh
+docker compose config --quiet
+docker compose pull qsticky
+```
+
+When migrating from the existing stack, remove its old updater container:
+
+```sh
+docker rm -f port-refresh
+```
+
+Then recreate the VPN and qBittorrent together and start qSticky:
+
+```sh
+docker compose up -d --force-recreate vpn qbittorrent qsticky
+docker compose logs --since=5m --follow qsticky vpn
+```
+
+Use `docker-compose` instead of `docker compose` on older installations. These
+commands briefly interrupt downloads while the VPN and qBittorrent restart.
+The qBittorrent configuration and downloads remain in their existing volumes.
+
+Look for qSticky confirming a login and a verified port update, or an initial
+check reporting that the port is already correct. Confirm qBittorrent's listening
+port matches the latest allocation in the VPN logs. The image's built-in
+healthcheck reports qSticky health; inspect it with `docker compose ps qsticky`.
+Authentication failures appear in qSticky's logs. If Gluetun loses its VPN
+connection or cannot obtain a forwarded port, that needs separate investigation.
+
 ## Notes
 
 ### Refreah docker images
